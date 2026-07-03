@@ -1,0 +1,38 @@
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  api:
+    build: ./api
+    container_name: api
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_URL=http://host.docker.internal:11434/api/generate
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./api:/app
+    depends_on:
+      - redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  worker:
+    build: ./api
+    container_name: celery_worker
+    command: celery -A tasks worker --loglevel=info
+    environment:
+      - OLLAMA_URL=http://host.docker.internal:11434/api/generate
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./api:/app
+    depends_on:
+      - redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
