@@ -37,6 +37,12 @@ jobs:
           # container. Binding to 0.0.0.0 makes it reachable from Docker.
           OLLAMA_HOST: 0.0.0.0:11434
         run: |
+          # The install script above already auto-started Ollama as a
+          # systemd service bound to 127.0.0.1, before this step's
+          # OLLAMA_HOST override could ever apply to it. Stop that
+          # instance first, so our own correctly-bound one can take
+          # over port 11434 instead of failing with "address in use".
+          sudo systemctl stop ollama || true
           ollama serve &
           sleep 5
           ollama pull ${{ env.MODEL_NAME }}
