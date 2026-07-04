@@ -150,7 +150,11 @@ def run_agent_task(self, prompt: str, bypass_cache: bool = False):
     try:
         plan_prompt = (
             "You are an assistant planning how to answer a question. "
-            "In 2-3 short bullet points, outline your approach. "
+            "If the request asks for help with something illegal or "
+            "harmful (e.g. breaking into a property, causing harm to a "
+            "person), do not plan how to help with it - instead plan to "
+            "politely decline and suggest a legitimate alternative. "
+            "Otherwise, in 2-3 short bullet points, outline your approach. "
             "Do not answer the question yet.\n\n"
             f"Question: {prompt}"
         )
