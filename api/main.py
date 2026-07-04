@@ -10,6 +10,7 @@ app = FastAPI()
 
 class RunRequest(BaseModel):
     prompt: str
+    bypass_cache: bool = False
 
 
 @app.on_event("startup")
@@ -24,7 +25,7 @@ def health():
 
 @app.post("/agent/run")
 async def run_agent(req: RunRequest):
-    task = run_agent_task.delay(req.prompt)
+    task = run_agent_task.delay(req.prompt, req.bypass_cache)
     return {"task_id": task.id, "status": "queued"}
 
 

@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  eval-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      MODEL_NAME: llama3.2:1b
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Quick syntax check
+        run: python -m py_compile api/*.py evals/*.py
+
+      - name: Cache Ollama models
+        uses: actions/cache@v4
+        with:
+          path: ~/.ollama/models
+          key: ollama-models-${{ env.MODEL_NAME }}
+
+      - name: Install Ollama
+        run: curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Start Ollama and pull the small model
+        run: |
+          ollama serve &
+          sleep 5
+          ollama pull ${{ env.MODEL_NAME }}
+
+      - name: Start Docker services (Redis, API, worker)
+        run: docker compose up -d --build
+
+      - name: Wait for the API to be ready
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8000/health; then
+              echo "API is up"
+              exit 0
+            fi
+            echo "Waiting for API... ($i/30)"
+            sleep 5
+          done
+          echo "API never became ready"
+          exit 1
+
+      - name: Install eval script dependencies
+        run: pip install requests
+
+      - name: Run eval suite (this gates the build)
+        run: python evals/run_evals.py
+
+      - name: Show service logs if anything failed
+        if: failure()
+        run: docker compose logs
+
+  build:
+    needs: eval-gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build the API/worker image
+        run: docker build -t mini-agent-observatory-api:latest ./api

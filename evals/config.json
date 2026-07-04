@@ -1,0 +1,7 @@
+{
+  "api_base_url": "http://localhost:8000",
+  "poll_interval_seconds": 5,
+  "poll_timeout_seconds": 300,
+  "min_judge_score": 3.5,
+  "deterministic_pass_rate": 1.0
+}
