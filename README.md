@@ -208,7 +208,7 @@ a user.
 
 ---
 
-## Project structure
+## structure
 
 ```
 Mini Agent Observatory/
