@@ -125,7 +125,12 @@ def judge_response(prompt, response, rubric):
         "SCORE: <number>\n"
         "REASON: <one sentence>"
     )
-    payload = {"model": MODEL_NAME, "prompt": judge_prompt, "stream": False}
+    payload = {
+        "model": MODEL_NAME,
+        "prompt": judge_prompt,
+        "stream": False,
+        "options": {"temperature": 0},
+    }
     resp = requests.post(OLLAMA_URL, json=payload, timeout=120)
     resp.raise_for_status()
     text = resp.json().get("response", "")

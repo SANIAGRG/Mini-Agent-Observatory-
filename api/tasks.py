@@ -104,7 +104,12 @@ def call_ollama(prompt: str, bypass_cache: bool = False):
                 "cache_hit": True,
             }
 
-    payload = {"model": MODEL_NAME, "prompt": prompt, "stream": False}
+    payload = {
+        "model": MODEL_NAME,
+        "prompt": prompt,
+        "stream": False,
+        "options": {"temperature": 0},
+    }
     response = requests.post(OLLAMA_URL, json=payload, timeout=120)
     response.raise_for_status()
     data = response.json()
