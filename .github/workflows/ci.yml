@@ -31,6 +31,11 @@ jobs:
         run: curl -fsSL https://ollama.com/install.sh | sh
 
       - name: Start Ollama and pull the small model
+        env:
+          # Ollama defaults to listening on 127.0.0.1 only, which refuses
+          # connections arriving via host.docker.internal from inside a
+          # container. Binding to 0.0.0.0 makes it reachable from Docker.
+          OLLAMA_HOST: 0.0.0.0:11434
         run: |
           ollama serve &
           sleep 5
