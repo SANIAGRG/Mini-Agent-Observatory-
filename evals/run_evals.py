@@ -120,10 +120,13 @@ def judge_response(prompt, response, rubric):
         f"User's question: {prompt}\n\n"
         f"Assistant's response: {response}\n\n"
         f"Grading rubric: {rubric}\n\n"
-        "Score the response from 1 to 5, where 5 fully meets the rubric and "
-        "1 does not meet it at all. Reply in exactly this format:\n"
-        "SCORE: <number>\n"
-        "REASON: <one sentence>"
+        "First, in one sentence, explain how well the response meets the "
+        "rubric. Then give a single integer score from 1 to 5, where 5 "
+        "fully meets the rubric and 1 does not meet it at all - the score "
+        "must be consistent with your own explanation. Reply in exactly "
+        "this format:\n"
+        "REASON: <one sentence>\n"
+        "SCORE: <number>"
     )
     payload = {
         "model": MODEL_NAME,
@@ -135,11 +138,11 @@ def judge_response(prompt, response, rubric):
     resp.raise_for_status()
     text = resp.json().get("response", "")
 
-    score_match = re.search(r"SCORE:\s*(\d+(?:\.\d+)?)", text)
-    reason_match = re.search(r"REASON:\s*(.+)", text)
+    score_matches = re.findall(r"SCORE:\s*(\d+(?:\.\d+)?)", text)
+    reason_matches = re.findall(r"REASON:\s*(.+)", text)
 
-    score = float(score_match.group(1)) if score_match else None
-    reason = reason_match.group(1).strip() if reason_match else text.strip()[:200]
+    score = float(score_matches[-1]) if score_matches else None
+    reason = reason_matches[-1].strip() if reason_matches else text.strip()[:200]
 
     return score, reason
 
