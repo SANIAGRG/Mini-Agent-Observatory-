@@ -150,11 +150,7 @@ def run_agent_task(self, prompt: str, bypass_cache: bool = False):
     try:
         plan_prompt = (
             "You are an assistant planning how to answer a question. "
-            "If the request asks for help with something illegal or "
-            "harmful (e.g. breaking into a property, causing harm to a "
-            "person), do not plan how to help with it - instead plan to "
-            "politely decline and suggest a legitimate alternative. "
-            "Otherwise, in 2-3 short bullet points, outline your approach. "
+            "In 2-3 short bullet points, outline your approach. "
             "Do not answer the question yet.\n\n"
             f"Question: {prompt}"
         )
@@ -174,11 +170,7 @@ def run_agent_task(self, prompt: str, bypass_cache: bool = False):
         answer_prompt = (
             f"Question: {prompt}\n\n"
             f"Your plan:\n{step1['response']}\n\n"
-            "Now give the final answer to the question directly, without "
-            "repeating the plan. If this request asks for help with "
-            "something illegal or harmful, your final answer must actually "
-            "decline and suggest a legitimate alternative - do not provide "
-            "the harmful information even partially."
+            "Now give the final answer to the question directly, without repeating the plan."
         )
         step2 = call_ollama(answer_prompt, bypass_cache=bypass_cache)
         trace_id_2 = log_trace_sync(

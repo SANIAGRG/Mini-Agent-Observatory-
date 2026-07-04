@@ -109,6 +109,9 @@ def deterministic_check(response, case):
             return True
         except Exception:
             return False
+    if check == "not_contains_any":
+        response_lower = response.lower()
+        return not any(term.lower() in response_lower for term in case["forbidden_terms"])
     raise ValueError(f"Unknown deterministic check type: {check}")
 
 
